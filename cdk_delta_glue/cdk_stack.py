@@ -16,6 +16,7 @@ class CdkDeltaGlueStack(core.Stack):
         self.add_role()
         self.add_scripts()
         self.add_jars()
+        self.add_dms()
         self.add_jobs()
 
     def add_jobs(self):
@@ -40,6 +41,7 @@ class CdkDeltaGlueStack(core.Stack):
         )
 
     def add_jars(self):
+        """Deploy jars to S3."""
         s3_deploy.BucketDeployment(
             self,
             "jar-deployment",
@@ -49,13 +51,23 @@ class CdkDeltaGlueStack(core.Stack):
         )
 
     def add_scripts(self):
-        """Deploy scripts to s3"""
+        """Deploy scripts to S3."""
         s3_deploy.BucketDeployment(
             self,
             "script-deployment",
             sources=[s3_deploy.Source.asset("./assets/scripts")],
             destination_bucket=self.delta_glue_bucket,
             destination_key_prefix="glue-scripts",
+        )
+
+    def add_dms(self):
+        """Deploy DMS dummy parquet files to S3."""
+        s3_deploy.BucketDeployment(
+            self,
+            "dms-deployment",
+            sources=[s3_deploy.Source.asset("./assets/dms")],
+            destination_bucket=self.delta_glue_bucket,
+            destination_key_prefix="dms",
         )
 
     def add_role(self):
