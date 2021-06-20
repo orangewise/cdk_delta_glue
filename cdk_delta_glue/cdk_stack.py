@@ -20,7 +20,7 @@ class CdkDeltaGlueStack(core.Stack):
         self.add_jobs()
 
     def add_jobs(self):
-        glue_full_load = glue.CfnJob(
+        glue.CfnJob(
             self,
             f"delta-full-load",
             role=self.role.role_arn,
@@ -29,6 +29,25 @@ class CdkDeltaGlueStack(core.Stack):
                 name=f"glueetl",  # Apache Spark ETL job
                 python_version="3",
                 script_location=f"s3://{self.delta_glue_bucket.bucket_name}/glue-scripts/delta_full_load.py",
+            ),
+            # https://docs.aws.amazon.com/glue/latest/dg/add-job.html
+            glue_version="2.0",
+            # https://docs.aws.amazon.com/glue/latest/dg/aws-glue-programming-etl-glue-arguments.html
+            default_arguments={
+                "--extra-py-files": f"s3://{self.delta_glue_bucket.bucket_name}/jars/delta-core_2.11-0.6.1.jar",
+                "--extra-jars": f"s3://{self.delta_glue_bucket.bucket_name}/jars/delta-core_2.11-0.6.1.jar",
+                "--conf": "spark.delta.logStore.class=org.apache.spark.sql.delta.storage.S3SingleDriverLogStore --conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension",
+            },
+        )
+        glue.CfnJob(
+            self,
+            f"delta-cdc-merge",
+            role=self.role.role_arn,
+            allocated_capacity=2,
+            command=glue.CfnJob.JobCommandProperty(
+                name=f"glueetl",  # Apache Spark ETL job
+                python_version="3",
+                script_location=f"s3://{self.delta_glue_bucket.bucket_name}/glue-scripts/delta_cdc_merge.py",
             ),
             # https://docs.aws.amazon.com/glue/latest/dg/add-job.html
             glue_version="2.0",
