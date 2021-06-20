@@ -1,3 +1,7 @@
+cdk_delta_glue
+==============
+
+Run [Delta Lake](https://delta.io) in AWS Glue using the [Cloud Development Kit](https://aws.amazon.com/cdk/).
 
 ## Usage
 
