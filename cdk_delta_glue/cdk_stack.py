@@ -20,6 +20,14 @@ class CdkDeltaGlueStack(core.Stack):
         self.add_jobs()
 
     def add_jobs(self):
+        # https://docs.aws.amazon.com/glue/latest/dg/aws-glue-programming-etl-glue-arguments.html
+        arguments = {
+            "--extra-py-files": f"s3://{self.delta_glue_bucket.bucket_name}/jars/delta-core_2.11-0.6.1.jar,s3://{self.delta_glue_bucket.bucket_name}/glue-scripts/lib.zip",
+            "--extra-jars": f"s3://{self.delta_glue_bucket.bucket_name}/jars/delta-core_2.11-0.6.1.jar",
+            "--conf": "spark.delta.logStore.class=org.apache.spark.sql.delta.storage.S3SingleDriverLogStore --conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension",
+            "--BUCKET": self.delta_glue_bucket.bucket_name,
+            "--TABLE": "data_ronald",
+        }
         glue.CfnJob(
             self,
             f"delta-full-load",
@@ -32,12 +40,7 @@ class CdkDeltaGlueStack(core.Stack):
             ),
             # https://docs.aws.amazon.com/glue/latest/dg/add-job.html
             glue_version="2.0",
-            # https://docs.aws.amazon.com/glue/latest/dg/aws-glue-programming-etl-glue-arguments.html
-            default_arguments={
-                "--extra-py-files": f"s3://{self.delta_glue_bucket.bucket_name}/jars/delta-core_2.11-0.6.1.jar",
-                "--extra-jars": f"s3://{self.delta_glue_bucket.bucket_name}/jars/delta-core_2.11-0.6.1.jar",
-                "--conf": "spark.delta.logStore.class=org.apache.spark.sql.delta.storage.S3SingleDriverLogStore --conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension",
-            },
+            default_arguments=arguments,
         )
         glue.CfnJob(
             self,
@@ -51,12 +54,7 @@ class CdkDeltaGlueStack(core.Stack):
             ),
             # https://docs.aws.amazon.com/glue/latest/dg/add-job.html
             glue_version="2.0",
-            # https://docs.aws.amazon.com/glue/latest/dg/aws-glue-programming-etl-glue-arguments.html
-            default_arguments={
-                "--extra-py-files": f"s3://{self.delta_glue_bucket.bucket_name}/jars/delta-core_2.11-0.6.1.jar",
-                "--extra-jars": f"s3://{self.delta_glue_bucket.bucket_name}/jars/delta-core_2.11-0.6.1.jar",
-                "--conf": "spark.delta.logStore.class=org.apache.spark.sql.delta.storage.S3SingleDriverLogStore --conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension",
-            },
+            default_arguments=arguments,
         )
 
     def add_jars(self):
