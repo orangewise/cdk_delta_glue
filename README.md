@@ -3,6 +3,10 @@ cdk_delta_glue
 
 Run [Delta Lake](https://delta.io) in AWS Glue using the [Cloud Development Kit](https://aws.amazon.com/cdk/).
 
+# Overview
+
+![overview](img/dms-glue-delta-lake-overview.png)
+
 ## Usage
 
 ```bash
@@ -77,6 +81,21 @@ parquet-tools show assets/dms/cdc/data_ronald/2021/06/11/20210611-084932768.parq
 
 # Athena Table
 
-```sql
+Create the Athena table by running the following sql statement (in the sAWS Athena console):
 
+```sql
+CREATE EXTERNAL TABLE `data_ronald` (
+  `id` bigint COMMENT '',
+  `datetime` timestamp COMMENT '',
+  `channel` bigint COMMENT '',
+  `value` float COMMENT ''
+)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
+STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.SymlinkTextInputFormat'
+OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION 's3://<YOUR_ACCOUNT_ID>-cdk-delta-glue/delta/data_ronald/_symlink_format_manifest/'
 ```
+
+# Query the table
+
+![overview](img/delta-athena-table.png)
